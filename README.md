@@ -44,3 +44,5 @@ Hasil : menggunakan emulator sehingga bukan alamat asli
 - setelah menambahkan ikon/marker :
 <img width="434" height="850" alt="image" src="https://github.com/user-attachments/assets/bb15a661-345b-4170-b5b6-579b6f6affe0" />
 
+- saat akan menghapus ikon/marker :
+<img width="428" height="841" alt="image" src="https://github.com/user-attachments/assets/0f4f6d7f-747c-4710-b90b-a05813049962" />
