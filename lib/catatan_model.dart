@@ -1,13 +1,11 @@
 import 'package:latlong2/latlong.dart';
-// import 'package:hive_flutter/hive_flutter.dart'; // Hapus ini
 
-// Hapus semua anotasi dan 'part' hive
 class CatatanModel {
   final double latitude;
   final double longitude;
   final String note;
   final String address;
-  final String type; 
+  final String type; // Tipe catatan (misalnya: 'Rumah', 'Kantor') untuk tugas 1
 
   CatatanModel({
     required this.latitude,
@@ -17,10 +15,10 @@ class CatatanModel {
     required this.type,
   });
 
-  // Helper: Mengubah data lat/lng menjadi objek LatLng
+  // Method getter untuk mengembalikan LatLng
   LatLng get position => LatLng(latitude, longitude);
 
-  // Helper: Constructor dari LatLng
+  // Method factory untuk membuat objek dari LatLng
   factory CatatanModel.fromLatLng({
     required LatLng position,
     required String note,
@@ -36,7 +34,7 @@ class CatatanModel {
     );
   }
 
-  // ✅ BARU untuk Shared Preferences: Konversi objek ke Map
+  // tugas 3 : Method untuk mengubah objek ke teks (JSON) disimpan di shared preferences
   Map<String, dynamic> toJson() => {
     'latitude': latitude,
     'longitude': longitude,
@@ -45,7 +43,7 @@ class CatatanModel {
     'type': type,
   };
 
-  // ✅ BARU untuk Shared Preferences: Membuat objek dari Map
+  // saat memuat data dari shared preferences, saat aplikasi dimulai
   factory CatatanModel.fromJson(Map<String, dynamic> json) {
     return CatatanModel(
       latitude: json['latitude'] as double,

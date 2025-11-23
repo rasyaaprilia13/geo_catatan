@@ -3,10 +3,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-// Tugas 3: Import Shared Preferences dan dart:convert
+
+// Tugas 3: Import Shared Preferences dan dart:convert untuk menyimpan dan memuat data
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
 import 'catatan_model.dart';
 
 void main() {
@@ -33,30 +33,26 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  // Tugas 3: Kembali menggunakan List standar
   List<CatatanModel> _savedNotes = []; 
   final MapController _mapController = MapController();
-
-  // Key untuk Shared Preferences
+  
+  // untuk menyimpan catatan
   static const String _NOTES_KEY = 'saved_notes'; 
 
-  // Tugas 3: Memuat data saat aplikasi dimulai
   @override
   void initState() {
     super.initState();
     _loadNotes();
   }
 
-  // Fungsi untuk memuat data dari Shared Preferences
+  // fungsi untuk simpan dan memuat catatan
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final String? notesString = prefs.getString(_NOTES_KEY);
 
     if (notesString != null && notesString.isNotEmpty) {
-      // Mengkonversi String JSON kembali menjadi List<Map>
       final List<dynamic> notesJson = jsonDecode(notesString);
       setState(() {
-        // Mengkonversi List<Map> menjadi List<CatatanModel>
         _savedNotes = notesJson
             .map((json) => CatatanModel.fromJson(json as Map<String, dynamic>))
             .toList();
@@ -64,18 +60,13 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Fungsi untuk menyimpan data ke Shared Preferences
   Future<void> _saveNotes() async {
     final prefs = await SharedPreferences.getInstance();
-    
-    // Mengkonversi List<CatatanModel> menjadi List<Map>
     final List<Map<String, dynamic>> notesJson = _savedNotes.map((note) => note.toJson()).toList();
-    
-    // Mengkonversi List<Map> menjadi String JSON
     await prefs.setString(_NOTES_KEY, jsonEncode(notesJson));
   }
   
-  // Tugas 1: Fungsi untuk memilih ikon berdasarkan jenis catatan
+  // tugas 1 : memilih icon berdasarkan type
   IconData _getIconForType(String type) {
     switch (type.toLowerCase()) {
       case 'home':
@@ -89,9 +80,8 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Fungsi untuk mendapatkan lokasi saat ini (tidak berubah)
+  // Fungsi lokasi saat ini
   Future<void> _findMyLocation() async {
-    // ... (kode _findMyLocation)
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
@@ -110,7 +100,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // Tugas 2: Fungsi untuk menampilkan dialog konfirmasi penghapusan
+  // tugas 2 : menampilkan dialog konfirmasi penghapusan
   Future<void> _showDeleteConfirmation(int index, CatatanModel note) async {
     return showDialog<void>(
       context: context,
@@ -141,83 +131,62 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
   
-  // Tugas 1: Fungsi untuk menampilkan dialog input catatan dan jenis
+  // tugas 1 : menampilkan dialog input catatan dan jenis
   Future<void> _showNoteDialog(latlong.LatLng point, String address) async {
-    String noteText = "";
-    String noteType = "other"; 
-    ValueNotifier<String> selectedType = ValueNotifier(noteType); 
+  String noteType = "other";
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Buat Catatan Baru'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Alamat: $address', style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Isi Catatan'),
-                onChanged: (value) => noteText = value,
-              ),
-              const SizedBox(height: 10),
-              // Menggunakan ValueListenableBuilder untuk memperbarui jenis yang dipilih
-              ValueListenableBuilder<String>(
-                valueListenable: selectedType,
-                builder: (context, value, child) {
-                  return DropdownButton<String>(
-                    value: value,
-                    items: <String>['other', 'home', 'shop', 'office']
-                        .map<DropdownMenuItem<String>>((String val) {
-                      return DropdownMenuItem<String>(
-                        value: val,
-                        child: Text(val.toUpperCase()),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        selectedType.value = newValue;
-                        noteType = newValue;
-                      }
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Simpan'),
-              onPressed: () {
-                if (noteText.isNotEmpty) {
-                  setState(() {
-                    // Tugas 3: Tambahkan ke List standar
-                    _savedNotes.add(CatatanModel.fromLatLng(
-                      position: point,
-                      note: noteText,
-                      address: address,
-                      type: noteType,
-                    ));
-                  });
-                  // Tugas 3: Simpan data setelah penambahan
-                  _saveNotes();
-                }
-                Navigator.of(context).pop();
+  await showDialog<void>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Pilih Jenis Catatan'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Alamat: $address', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+
+            // Dropdown sederhana tanpa ValueNotifier
+            DropdownButton<String>(
+              value: noteType,
+              items: ['other', 'home', 'shop', 'office']
+                  .map((val) => DropdownMenuItem(value: val, child: Text(val.toUpperCase())))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null) noteType = val;
               },
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              // langsung simpan tanpa isi note
+              setState(() {
+                _savedNotes.add(CatatanModel.fromLatLng(
+                  position: point,
+                  note: "",              
+                  address: address,
+                  type: noteType,
+                ));
+              });
+              _saveNotes();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  // MODIFIKASI _handleLongPress(): Panggil dialog baru
+
+  // tambahkan catatan
   void _handleLongPress(TapPosition _, latlong.LatLng point) async {
     List<Placemark> placemarks = await placemarkFromCoordinates(
       point.latitude,
